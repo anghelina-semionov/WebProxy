@@ -1,19 +1,23 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Common.Models;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using SyncNode.Services;
 
 namespace SyncNode.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class SyncController : ControllerBase
     {
-        [HttpPost]
-        public IActionResult Sync()
+        private readonly SyncWorkJobService _workJobService;
+        public SyncController(SyncWorkJobService workJobService)
         {
+            _workJobService = workJobService;
+        }
+
+        [HttpPost]
+        public IActionResult Sync(SyncEntity entity)
+        {
+            _workJobService.AddItem(entity);
             return Ok();
         }
     }

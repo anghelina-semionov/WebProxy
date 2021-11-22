@@ -5,6 +5,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using SyncNode.Services;
+using SyncNode.Settings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +27,11 @@ namespace SyncNode
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<MenuAPISettings>(Configuration.GetSection("MenuAPISettings"));
+            services.AddSingleton<IMenuAPISettings>(provider => 
+            provider.GetRequiredService<IOptions<MenuAPISettings>>().Value);
+            services.AddSingleton<SyncWorkJobService>();
+            services.AddHostedService(provider => provider.GetService<SyncWorkJobService>());
             services.AddControllers();
         }
 
