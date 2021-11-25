@@ -47,13 +47,13 @@ namespace Client.UserControls
 
             //list.Add(l);
 
-            client.BaseAddress = new Uri("http://localhost:9000/api/");
+            client.BaseAddress = new Uri("http://localhost:9000/api/menu/");
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(
                new MediaTypeWithQualityHeaderValue("application/json"));
             try
             {
-                var response = await client.GetStringAsync("menuitems");
+                var response = await client.GetStringAsync("menuitem");
                 if (response != null)
                 {
                     var items = JsonConvert.DeserializeObject<List<Common.Models.MenuItem>>(response);

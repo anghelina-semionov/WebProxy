@@ -3,6 +3,7 @@ using Common.Utilities;
 using Microsoft.Extensions.Hosting;
 using SyncNode.Settings;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -12,12 +13,13 @@ namespace SyncNode.Services
 {
     public class SyncWorkJobService : IHostedService
     {
-        private readonly Dictionary<Guid, SyncEntity> documents =
-            new Dictionary<Guid, SyncEntity>();
+        private readonly  ConcurrentDictionary<Guid, SyncEntity> documents =
+            new ConcurrentDictionary<Guid, SyncEntity>();
         private readonly object _locker = new object();
         private Timer _timer;
         private readonly IMenuAPISettings _settings;
-        private readonly HttpClientUtility _utility = new HttpClientUtility();
+        // private readonly HttpClientUtility _utility = new HttpClientUtility();
+        
         public SyncWorkJobService(IMenuAPISettings settings)
         {
             _settings = settings;
@@ -25,14 +27,14 @@ namespace SyncNode.Services
         public void AddItem(SyncEntity entity)
         {
             SyncEntity document = null;
-            lock (_locker)
-            {
+           // lock (_locker)
+            //{
                 bool isPresent = documents.TryGetValue(entity.Id, out document);
                 if (!isPresent || (isPresent && entity.LastChangedAt > document.LastChangedAt))
                 {
                     documents[entity.Id] = entity;
                 }
-            }
+            //}
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -51,18 +53,18 @@ namespace SyncNode.Services
             foreach (var doc in documents)
             {
                 SyncEntity entity = null;
-                lock (_locker)
-                {
-                    var isPresent = documents.Remove(doc.Key, out entity);
+                //lock (_locker)
+                //{
+                    var isPresent = documents.TryRemove(doc.Key, out entity);
                     if(isPresent)
                     {
                         var receivers = _settings.Hosts.Where(u => !u.Contains(entity.Origin));
                         foreach(var receiver in receivers)
                         {
-                            var url = $"{receiver}/sync/{entity.ObjectType}";
+                            var url = $"{receiver}/{entity.ObjectType}/sync";
                             try
                             {
-                                var result = _utility.SendJson(entity.JsonData, url, entity.SyncType);
+                                var result = HttpClientUtility.SendJson(entity.JsonData, url, entity.SyncType);
                                 if(!result.IsSuccessStatusCode)
                                 {
 
@@ -74,7 +76,7 @@ namespace SyncNode.Services
                             }
                         }
                     }
-                }
+               // }
             }
         }
     }

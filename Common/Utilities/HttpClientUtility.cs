@@ -5,8 +5,8 @@ namespace Common.Utilities
 {
     public class HttpClientUtility
     {
-        private readonly HttpClient _client = new HttpClient();
-        public HttpResponseMessage SendJson(string json, string url, string method)
+        private  static readonly HttpClient _client = new HttpClient();
+        public static HttpResponseMessage SendJson(string json, string url, string method)
         {
             var httpMethod = new HttpMethod(method.ToUpper());
             var content = new StringContent(json, Encoding.UTF8, "application/json");

@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using System;
+
 
 namespace Common.Models
 {
     public abstract class MongoDocument
     {
-       // [BsonId]
+       [BsonId]
        public Guid Id { get; set; }
+        
        public DateTime LastChangedAt { get; set; }
     }
 }
